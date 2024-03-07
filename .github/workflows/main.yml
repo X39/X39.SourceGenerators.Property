@@ -1,11 +1,10 @@
-
 name: NuGet package publish
 on:
   push:
     branches: [ master ]
   workflow_dispatch:
 jobs:
-  upload-to-npgk:
+  build-test-publish:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
