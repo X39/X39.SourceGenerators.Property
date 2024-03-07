@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <IsPackable>true</IsPackable>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <IsRoslynComponent>true</IsRoslynComponent>
+
+        <PackageId>X39.SourceGenerators.Property</PackageId>
+        <Authors>X39</Authors>
+        <Title>X39.SourceGenerators.Property</Title>
+        <PackageDescription>A source generator to generate properties automatically from fields</PackageDescription>
+        <SupportUrl>https://github.com/X39/X39.SourceGenerators.Property/issues</SupportUrl>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/X39/X39.SourceGenerators.Property</RepositoryUrl>
+        <PackageLicenseExpression>LGPL-3.0-only</PackageLicenseExpression>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <IncludeSymbols>true</IncludeSymbols>
+        <IncludeSources>true</IncludeSources>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <IsTrimable>true</IsTrimable>
+        <NeutralLanguage>en-US</NeutralLanguage>
+        <DefaultLanguage>en-US</DefaultLanguage>
+        <PackageTags>utility;property;source-generators</PackageTags>
+        <AnalysisLevel>latest-recommended</AnalysisLevel>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\README.md">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
+        <None Remove="Properties\launchSettings.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.9.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Properties\" />
+    </ItemGroup>
+
+</Project>
