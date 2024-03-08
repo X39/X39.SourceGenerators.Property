@@ -255,6 +255,63 @@ public partial class MyClass
 }
 ```
 
+## `GeneratePropertiesAttribute`
+
+This attribute will make the source generator generate properties if no other attribute is desired.
+
+### On the class
+
+```csharp
+// User-Code
+[GenerateProperties]
+public partial class MyClass
+{
+    private int _myProperty;
+}
+
+// Generated-Code
+public partial class MyClass
+{
+    public int MyProperty
+    {
+        get => _myProperty;
+        set
+        {
+            if (_myProperty == value)
+                return;
+            _myProperty = value;
+        }
+    }
+}
+```
+
+### On the field
+
+```csharp
+// User-Code
+public partial class MyClass
+{
+    [GenerateProperties]
+    private int _myProperty;
+}
+
+// Generated-Code
+public partial class MyClass
+{
+    public int MyProperty
+    {
+        get => _myProperty;
+        set
+        {
+            if (_myProperty == value)
+                return;
+            _myProperty = value;
+        }
+    }
+}
+```
+
+
 ## `NotifyPropertyChangingAttribute`
 
 This attribute will make the source generator add a `PropertyChanging` event call to the setter of the property.

@@ -4,6 +4,7 @@ namespace X39.SourceGenerators.Property;
 
 internal sealed class GenInfo
 {
+    public bool                                                             Generate { get; set; }
     public bool?                                                            NotifyPropertyChanged { get; set; }
     public bool?                                                            NotifyPropertyChanging { get; set; }
     public string?                                                          ValidationStrategy { get; set; }
@@ -19,6 +20,7 @@ internal sealed class GenInfo
     {
         return new GenInfo
         {
+            Generate               = Generate || defaultGenInfo.Generate,
             NotifyPropertyChanged  = NotifyPropertyChanged ?? defaultGenInfo.NotifyPropertyChanged,
             NotifyPropertyChanging = NotifyPropertyChanging ?? defaultGenInfo.NotifyPropertyChanging,
             ValidationStrategy     = ValidationStrategy ?? defaultGenInfo.ValidationStrategy,
@@ -34,7 +36,8 @@ internal sealed class GenInfo
 
     public bool GenerateProperty()
     {
-        return NotifyPropertyChanged is not null
+        return Generate
+               || NotifyPropertyChanged is not null
                || NotifyPropertyChanging is not null
                || ValidationStrategy is not null
                || PropertyName is not null
