@@ -1,6 +1,10 @@
 <!-- TOC -->
 * [X39.SourceGenerators.Property](#x39sourcegeneratorsproperty)
 * [Quick Start](#quick-start)
+* [Common fixes with source generators](#common-fixes-with-source-generators)
+  * [The Source-Generator is not working (After installing the package; After Building)](#the-source-generator-is-not-working-after-installing-the-package-after-building)
+  * [`dotnet build` errors that it cannot find the generated output](#dotnet-build-errors-that-it-cannot-find-the-generated-output)
+  * [Rider does not recognize the source generator](#rider-does-not-recognize-the-source-generator)
 * [When and how are properties generated?](#when-and-how-are-properties-generated)
 * [Attributes](#attributes)
   * [`NotifyPropertyChangedAttribute`](#notifypropertychangedattribute)
@@ -49,14 +53,6 @@ This library adds a source generator that generates properties for a given class
 
 # Quick Start
 
-***!IMPORTANT!***: After installing the package, check whether the build output contains a `CS9057` warning.
-If it does, your compiler is not updated enough to support this source generator.
-Install the latest .NET SDK to fix this.
-
-***!FOR RIDER USERS!*** You may have to restart Rider after installing the package to make the source generator work.
-
------
-
 Add the nuget package to your project.
 After that, make the classes you want to generate properties for partial and add corresponding attributes to the class,
 eg.:
@@ -92,6 +88,28 @@ public partial class MyClass
     }
 }
 ```
+
+# Common fixes with source generators
+
+## The Source-Generator is not working (After installing the package; After Building)
+
+After installing the package,
+check whether the build output contains a `CS9057` warning.
+If it does, your compiler is not updated enough to support this source generator.
+Install the latest .NET SDK to fix this.
+
+## `dotnet build` errors that it cannot find the generated output
+
+The dotnet build server may have something cached.
+Run `dotnet build-server shutdown` to restart the build server.
+
+## Rider does not recognize the source generator
+
+There might be multiple issues here:
+
+- You may have to restart Rider after installing the package to make the source generator work.
+- Make sure Roslyn Analyzers are enabled in the settings.
+  Search for "Roslyn" in the settings and enable all Roslyn related checkboxes related to building.
 
 # When and how are properties generated?
 
