@@ -271,8 +271,8 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                                                       /// The default behavior, using `Equals` for reference types,
                                                       /// `==` for value types and epsilon comparison for floating point types.
                                                       /// </summary>
-                                                      /// <seealso cref="FloatEpsilon"/>
-                                                      /// <seealso cref="DoubleEpsilon"/>
+                                                      /// <seealso cref="System.Single.Epsilon"/>
+                                                      /// <seealso cref="System.Double.Epsilon"/>
                                                       Default,
                                                
                                                       /// <summary>
