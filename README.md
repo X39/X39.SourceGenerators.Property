@@ -7,6 +7,9 @@
   * [Rider does not recognize the source generator](#rider-does-not-recognize-the-source-generator)
 * [When and how are properties generated?](#when-and-how-are-properties-generated)
 * [Attributes](#attributes)
+  * [`GeneratePropertiesAttribute`](#generatepropertiesattribute)
+    * [On the class](#on-the-class)
+    * [On the field](#on-the-field)
   * [`NotifyPropertyChangedAttribute`](#notifypropertychangedattribute)
     * [On the class with true](#on-the-class-with-true)
     * [On the class with false](#on-the-class-with-false)
@@ -18,7 +21,7 @@
     * [On the field with true](#on-the-field-with-true-1)
     * [On the field with false](#on-the-field-with-false-1)
   * [`PropertyNameAttribute`](#propertynameattribute)
-    * [On the field](#on-the-field)
+    * [On the field](#on-the-field-1)
   * [`ValidationStrategyAttribute`](#validationstrategyattribute)
     * [Supported Validations](#supported-validations)
     * [Available Strategies](#available-strategies)
@@ -27,9 +30,9 @@
     * [On the class  (`EValidationStrategy.Rollback`)](#on-the-class-evalidationstrategyrollback)
     * [On the class  (`EValidationStrategy.Ignore`)](#on-the-class-evalidationstrategyignore)
   * [`PropertyEncapsulationAttribute`](#propertyencapsulationattribute)
-    * [On the field](#on-the-field-1)
-  * [`VirtualPropertyAttribute`](#virtualpropertyattribute)
     * [On the field](#on-the-field-2)
+  * [`VirtualPropertyAttribute`](#virtualpropertyattribute)
+    * [On the field](#on-the-field-3)
   * [`EqualityCheckAttribute`](#equalitycheckattribute)
     * [Supported Equality Modes](#supported-equality-modes)
     * [On the class  (`EEqualityCheckMode.Default`)](#on-the-class-eequalitycheckmodedefault)
@@ -37,7 +40,7 @@
     * [On the class  (`EEqualityCheckMode.None`)](#on-the-class-eequalitycheckmodenone)
     * [On the field  (`EEqualityCheckMode.Default`)](#on-the-field-eequalitycheckmodedefault)
   * [`GuardAttribute`](#guardattribute)
-    * [On the field](#on-the-field-3)
+    * [On the field](#on-the-field-4)
 * [Project Notes](#project-notes)
   * [Building](#building)
   * [Test coverage](#test-coverage)
@@ -137,6 +140,62 @@ For a more "example driven" approach to this explanation, see the following tabl
 Some attributes are placeable on either the class or field.
 If the attribute is placed on the class, the attribute will be taken as a default for all fields.
 This also implies that the field attributes always take precedence over the class attributes.
+
+## `GeneratePropertiesAttribute`
+
+This attribute will make the source generator generate properties if no other attribute is desired.
+
+### On the class
+
+```csharp
+// User-Code
+[GenerateProperties]
+public partial class MyClass
+{
+    private int _myProperty;
+}
+
+// Generated-Code
+public partial class MyClass
+{
+    public int MyProperty
+    {
+        get => _myProperty;
+        set
+        {
+            if (_myProperty == value)
+                return;
+            _myProperty = value;
+        }
+    }
+}
+```
+
+### On the field
+
+```csharp
+// User-Code
+public partial class MyClass
+{
+    [GenerateProperties]
+    private int _myProperty;
+}
+
+// Generated-Code
+public partial class MyClass
+{
+    public int MyProperty
+    {
+        get => _myProperty;
+        set
+        {
+            if (_myProperty == value)
+                return;
+            _myProperty = value;
+        }
+    }
+}
+```
 
 ## `NotifyPropertyChangedAttribute`
 
@@ -254,63 +313,6 @@ public partial class MyClass
     }
 }
 ```
-
-## `GeneratePropertiesAttribute`
-
-This attribute will make the source generator generate properties if no other attribute is desired.
-
-### On the class
-
-```csharp
-// User-Code
-[GenerateProperties]
-public partial class MyClass
-{
-    private int _myProperty;
-}
-
-// Generated-Code
-public partial class MyClass
-{
-    public int MyProperty
-    {
-        get => _myProperty;
-        set
-        {
-            if (_myProperty == value)
-                return;
-            _myProperty = value;
-        }
-    }
-}
-```
-
-### On the field
-
-```csharp
-// User-Code
-public partial class MyClass
-{
-    [GenerateProperties]
-    private int _myProperty;
-}
-
-// Generated-Code
-public partial class MyClass
-{
-    public int MyProperty
-    {
-        get => _myProperty;
-        set
-        {
-            if (_myProperty == value)
-                return;
-            _myProperty = value;
-        }
-    }
-}
-```
-
 
 ## `NotifyPropertyChangingAttribute`
 
