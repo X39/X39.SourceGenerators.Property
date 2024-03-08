@@ -43,7 +43,6 @@ internal sealed class GenInfo
                // || Range is not null
                // || MaxLength is not null
                || EqualityCheck is not null
-               || GuardMethods.Count > 0
-            ;
+               || GuardMethods.Count > 0;
     }
 }

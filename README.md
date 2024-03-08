@@ -49,6 +49,14 @@ This library adds a source generator that generates properties for a given class
 
 # Quick Start
 
+***!IMPORTANT!***: After installing the package, check whether the build output contains a `CS9057` warning.
+If it does, your compiler is not updated enough to support this source generator.
+Install the latest .NET SDK to fix this.
+
+***!FOR RIDER USERS!*** You may have to restart Rider after installing the package to make the source generator work.
+
+-----
+
 Add the nuget package to your project.
 After that, make the classes you want to generate properties for partial and add corresponding attributes to the class,
 eg.:
@@ -347,6 +355,7 @@ public partial class MyClass
 ```
 
 ## `PropertyNameAttribute`
+
 This attribute will make the source generator use the given name as the property name.
 It cannot be placed on the class.
 
@@ -377,15 +386,18 @@ public partial class MyClass
 ```
 
 ## `ValidationStrategyAttribute`
+
 The validation strategy attribute is used to define how additional, validating properties should be handled, when
 the validation fails.
 
 ### Supported Validations
+
 - `System.ComponentModel.DataAnnotations.RangeAttribute`
 - `System.ComponentModel.DataAnnotations.MaxLengthAttribute`
 - [`GuardAttribute`](#GuardAttribute)
 
 ### Available Strategies
+
 - `EValidationStrategy.Exception`
   This strategy will throw an `ArgumentException` when the validation fails.
   *This is the default strategy.*
@@ -394,7 +406,6 @@ the validation fails.
   If the `NotifyPropertyChanged` attribute is present, the event will be raised with no value change.
 - `EValidationStrategy.Ignore`
   This strategy will ignore the validation and exit the setter without changing the value.
-
 
 ### On the class  (`EValidationStrategy.Exception`)
 
@@ -522,10 +533,12 @@ public partial class MyClass
 ```
 
 ## `PropertyEncapsulationAttribute`
+
 This attribute will make the source generator encapsulate the property with the given access modifier.
 It cannot be placed on the class.
 
 Possible values are:
+
 - `EPropertyEncapsulation.Public`
 - `EPropertyEncapsulation.Protected`
 - `EPropertyEncapsulation.Internal`
@@ -559,6 +572,7 @@ public partial class MyClass
 ```
 
 ## `VirtualPropertyAttribute`
+
 This attribute will make the source generator generate a virtual property.
 It cannot be placed on the class.
 
@@ -589,9 +603,11 @@ public partial class MyClass
 ```
 
 ## `EqualityCheckAttribute`
+
 This attribute will change how or if the equality check is performed.
 
 ### Supported Equality Modes
+
 - `EEqualityCheckMode.Default`
   This mode will use the default equality check, using `==` for primitive types and `object.Equals` for non-primitive
   types.
@@ -709,6 +725,7 @@ public partial class MyClass
 ```
 
 ## `GuardAttribute`
+
 The guard attribute allows to make the source generator use custom validation methods to validate the property.
 See the [`ValidationStrategyAttribute`](#ValidationStrategyAttribute) for more information on how to change validation
 handling.
@@ -751,8 +768,8 @@ public partial class MyClass
 }
 ```
 
-
 # Project Notes
+
 This project is part of my personal utility libraries i use in my projects.
 The following few paragraphs are meant to give you an overview of the project and how you can contribute to it.
 
@@ -762,6 +779,7 @@ This project uses GitHub Actions for continuous integration. The workflow is def
 includes steps for restoring dependencies, building the project, and publishing a NuGet package.
 
 ## Test coverage
+
 This project is covered by unit tests for the generator only.
 This means that the generated code is not yet tested.
 
@@ -808,7 +826,6 @@ potential liability caused by your contribution to you (e.g., if your contributi
 employer).
 Feel free to discuss this agreement in the discussions section of this repository, i am open to changes here (as long as
 they do not open me or any other user of this project to any liability due to a **malicious contribution**).
-
 
 ## License
 
