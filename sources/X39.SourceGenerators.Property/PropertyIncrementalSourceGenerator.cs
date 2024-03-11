@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using X39.Util.Collections;
 
 namespace X39.SourceGenerators.Property;
 
@@ -25,7 +26,7 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                                                #nullable enable
                                                using System;
                                                using System.Runtime.CompilerServices;
-                                               
+
                                                namespace X39.SourceGenerators.Property
                                                {
                                                    /// <summary>
@@ -171,7 +172,54 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                                                        /// </summary>
                                                        public PropertyNameAttribute(string name) { Name = name; }
                                                    }
+                                                   
+                                                   /// <summary>
+                                                   /// Allows to add attributes to the generated properties which normally would not be allowed on eg. fields or classes.
+                                                   /// </summary>
+                                                   /// <remarks>
+                                                   /// This attribute will, unless explicitly requested, override the defaults set by a class annotated with this,
+                                                   /// when used on a field.
+                                                   /// The default inheritance behavior cannot be changed when used on a class,
+                                                   /// but only one field has to change the inheritance behavior to inherit.
+                                                   /// </remarks>
+                                                   [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+                                                   [CompilerGenerated]
+                                                   public class PropertyAttributeAttribute : Attribute
+                                                   {
+                                                       public string AttributeDefinition { get; }
+                                                       public bool Inherit { get; }
                                                
+                                                       /// <summary>
+                                                       /// Allows to add attributes to the generated properties which normally would not be allowed on eg. fields or classes.
+                                                       /// </summary>
+                                                       /// <param name="attributeDefinition">The full attribute definition as it would normally be written in code.</param>
+                                                       /// <param name="inherit">
+                                                       ///     When <see langword="true"/>, the attribute will be appended to the class defined attributes.
+                                                       ///     When <see langword="false"/>, the attribute will override the class defined attributes.
+                                                       /// The default inheritance behavior cannot be changed when used on a class,
+                                                       /// but only one field has to change the inheritance behavior to inherit.
+                                                       /// </param>
+                                                       /// <example>
+                                                       /// <code>
+                                                       /// [PropertyAttribute("Range(0, 100)")]
+                                                       /// [PropertyAttribute("[Range(0, 100)]")]
+                                                       /// [PropertyAttribute("[Range(0, 100), MaxLength(10)]")]
+                                                       /// </code>
+                                                       public PropertyAttributeAttribute(string attributeDefinition, bool inherit = false)
+                                                       {
+                                                           AttributeDefinition = attributeDefinition;
+                                                           Inherit = inherit;
+                                                       }
+                                                   }
+                                                   
+                                                   /// <summary>
+                                                   /// By default, the generator will take over the properties of the annotated fields.
+                                                   /// This attribute allows to disable the takeover for a specific field or the entire class.
+                                                   /// </summary>
+                                                   [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+                                                   [CompilerGenerated]
+                                                   public class DisableAttributeTakeoverAttribute : Attribute { }
+                                                   
                                                    /// <summary>
                                                    /// Enum containing the possible property encapsulation strategies for the <see cref="PropertyEncapsulationAttribute"/>.
                                                    /// </summary>
@@ -331,20 +379,41 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                                                    {
                                                        
                                                    }
-                                               }
                                                
+                                                   /// <summary>
+                                                   /// Instructs the generator to not generate properties for the annotated field.
+                                                   /// </summary>
+                                                   [CompilerGenerated]
+                                                   [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+                                                   public class NoPropertyAttribute : Attribute
+                                                   {
+                                                       
+                                                   }
+                                               }
+
                                                """;
 
     private const string GeneratePropertiesAttribute = "X39.SourceGenerators.Property.GeneratePropertiesAttribute";
+
+    private const string NoPropertyAttribute =
+        "X39.SourceGenerators.Property.NoPropertyAttribute";
+
+    // ReSharper disable once InconsistentNaming
     private const string NotifyPropertyChangedAttribute =
         "X39.SourceGenerators.Property.NotifyPropertyChangedAttribute";
 
+    // ReSharper disable once InconsistentNaming
     private const string NotifyPropertyChangingAttribute =
         "X39.SourceGenerators.Property.NotifyPropertyChangingAttribute";
 
     private const string ValidationStrategyAttribute = "X39.SourceGenerators.Property.ValidationStrategyAttribute";
 
     private const string PropertyNameAttribute = "X39.SourceGenerators.Property.PropertyNameAttribute";
+
+    private const string PropertyAttributeAttribute = "X39.SourceGenerators.Property.PropertyAttributeAttribute";
+
+    private const string DisableAttributeTakeoverAttribute =
+        "X39.SourceGenerators.Property.DisableAttributeTakeoverAttribute";
 
     private const string PropertyEncapsulationAttribute =
         "X39.SourceGenerators.Property.PropertyEncapsulationAttribute";
@@ -413,6 +482,10 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
             if (attributeName == ValidationStrategyAttribute)
                 return (classDeclarationSyntax, true);
             // if (attributeName == PropertyNameAttribute) return (classDeclarationSyntax, true);
+            if (attributeName == PropertyAttributeAttribute)
+                return (classDeclarationSyntax, true);
+            if (attributeName == DisableAttributeTakeoverAttribute)
+                return (classDeclarationSyntax, true);
             if (attributeName == PropertyEncapsulationAttribute)
                 return (classDeclarationSyntax, true);
             if (attributeName == VirtualPropertyAttribute)
@@ -435,6 +508,8 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
             // Check the full name of the attribute.
             if (attributeName == GeneratePropertiesAttribute)
                 return (classDeclarationSyntax, true);
+            if (attributeName == NoPropertyAttribute)
+                return (classDeclarationSyntax, true);
             if (attributeName == NotifyPropertyChangedAttribute)
                 return (classDeclarationSyntax, true);
             if (attributeName == NotifyPropertyChangingAttribute)
@@ -442,6 +517,10 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
             if (attributeName == ValidationStrategyAttribute)
                 return (classDeclarationSyntax, true);
             if (attributeName == PropertyNameAttribute)
+                return (classDeclarationSyntax, true);
+            if (attributeName == PropertyAttributeAttribute)
+                return (classDeclarationSyntax, true);
+            if (attributeName == DisableAttributeTakeoverAttribute)
                 return (classDeclarationSyntax, true);
             if (attributeName == PropertyEncapsulationAttribute)
                 return (classDeclarationSyntax, true);
@@ -471,17 +550,19 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
     {
         GenInfo GetGenerationInfo(IReadOnlyCollection<AttributeData> attributes)
         {
-            bool generateProperty = false;
-            bool?                                                            notifyPropertyChanged  = null;
-            bool?                                                            notifyPropertyChanging = null;
-            string?                                                          validationStrategy     = null;
-            string?                                                          propertyName           = null;
-            string?                                                          propertyEncapsulation  = null;
-            bool?                                                            virtualProperty        = null;
-            (string type, string from, string to)?                           range                  = null;
-            int?                                                             maxLength              = null;
-            (string mode, string epsilonF, string epsilonD, string? custom)? equalityCheck          = null;
-            List<(string methodName, string? className)>                     guardMethods           = new();
+            bool?                                                            generateProperty         = null;
+            bool?                                                            notifyPropertyChanged    = null;
+            bool?                                                            notifyPropertyChanging   = null;
+            string?                                                          validationStrategy       = null;
+            string?                                                          propertyName             = null;
+            string?                                                          propertyEncapsulation    = null;
+            bool?                                                            virtualProperty          = null;
+            (string type, string from, string to)?                           range                    = null;
+            int?                                                             maxLength                = null;
+            (string mode, string epsilonF, string epsilonD, string? custom)? equalityCheck            = null;
+            (List<string> attributes, bool inherit)?                         propertyAttributes       = null;
+            (List<string> attributes, bool inherit)?                         disableAttributeTakeover = null;
+            List<(string methodName, string? className)>                     guardMethods             = new();
             foreach (var attribute in attributes)
             {
                 if (attribute.AttributeClass is null)
@@ -489,8 +570,109 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                 var attributeName = attribute.AttributeClass.ToDisplayString();
                 switch (attributeName)
                 {
+                    case RangeAttribute when attribute.AttributeConstructor is not null
+                                             && attribute.ConstructorArguments.Length is 2 or 3:
+                    {
+                        var    first = attribute.AttributeConstructor.Parameters[0].Type.ToDisplayString();
+                        string rangeAttribute;
+                        switch (first)
+                        {
+                            case "double":
+                            {
+                                var from = attribute.ConstructorArguments[0].Value?.ToString().Replace(',', '.')
+                                           ?? "0.0";
+                                var to = attribute.ConstructorArguments[1].Value?.ToString().Replace(',', '.') ?? "0.0";
+                                range = (first, from, to);
+                                rangeAttribute = $"[{attributeName}({from}, {to})]";
+                                break;
+                            }
+                            case "int":
+                            {
+                                var from = attribute.ConstructorArguments[0].Value?.ToString() ?? "0";
+                                var to   = attribute.ConstructorArguments[1].Value?.ToString() ?? "0";
+                                range = (first, from, to);
+                                rangeAttribute = $"[{attributeName}({from}, {to})]";
+                                break;
+                            }
+                            case "System.Type" when attribute.ConstructorArguments.Length is 3:
+                            {
+                                var from = attribute.ConstructorArguments[1].Value?.ToString() ?? "0";
+                                var to   = attribute.ConstructorArguments[2].Value?.ToString() ?? "0";
+                                range = (first, from, to);
+                                rangeAttribute = $"[{attributeName}(typeof({attribute.ConstructorArguments[0].Value}), \"{from.Replace("\"", "\\\"")}\", \"{to}\")]";
+                                break;
+                            }
+                            default: continue;
+                        }
+                        disableAttributeTakeover = disableAttributeTakeover is null
+                            ? (new List<string> { rangeAttribute }, false)
+                            : (disableAttributeTakeover.Value.attributes.Append(rangeAttribute).ToList(), disableAttributeTakeover.Value.inherit);
+                        break;
+                    }
+                    case MaxLengthAttribute when attribute.ConstructorArguments.Length is 1:
+                        maxLength = (int) (attribute.ConstructorArguments[0].Value ?? 0);
+                        goto default;
+                    default:
+                    {
+                        var builder = new StringBuilder();
+                        builder.Append('[');
+                        builder.Append(attributeName);
+                        if (attribute.ConstructorArguments.Length > 0)
+                        {
+                            builder.Append('(');
+                            for (var i = 0; i < attribute.ConstructorArguments.Length; i++)
+                            {
+                                if (i > 0)
+                                    builder.Append(", ");
+                                builder.Append(Convert.ToString(attribute.ConstructorArguments[i].Value, CultureInfo.InvariantCulture));
+                            }
+
+                            builder.Append(')');
+                        }
+
+                        builder.Append(']');
+                        disableAttributeTakeover = disableAttributeTakeover is null
+                            ? (new List<string> { builder.ToString() }, false)
+                            : (disableAttributeTakeover.Value.attributes.Append(builder.ToString()).ToList(), disableAttributeTakeover.Value.inherit);
+                        break;
+                    }
+                    case DisableAttributeTakeoverAttribute:
+                        disableAttributeTakeover = disableAttributeTakeover is null
+                            ? (new List<string>(), true)
+                            : (disableAttributeTakeover.Value.attributes, true);
+                        break;
+                    case PropertyAttributeAttribute:
+                    {
+                        var name = attribute.ConstructorArguments[0].Value?.ToString()
+                                   ?? attribute.NamedArguments.FirstOrDefault(a => a.Key == "name")
+                                               .Value.Value?.ToString();
+                        if (name is null)
+                            continue;
+                        // name = "Range(0, 100)"
+                        // name = "[Range(0, 100)]"
+                        // name = "[Range(0, 100), MaxLength(10)]"
+                        if (!name.StartsWith("[", StringComparison.Ordinal)
+                            && !name.EndsWith("]", StringComparison.Ordinal))
+                            name = string.Concat("[", name, "]");
+                        var inherit = (bool?) attribute.ConstructorArguments[1].Value
+                                      ?? attribute.NamedArguments.FirstOrDefault(a => a.Key == "inherit")
+                                                  .Value.Value is true;
+                        if (propertyAttributes is null)
+                            propertyAttributes = (new List<string> { name }, inherit);
+                        else
+                        {
+                            propertyAttributes.Value.attributes.Add(name);
+                            propertyAttributes = (
+                                propertyAttributes.Value.attributes, propertyAttributes.Value.inherit || inherit);
+                        }
+
+                        break;
+                    }
                     case GeneratePropertiesAttribute:
                         generateProperty = true;
+                        break;
+                    case NoPropertyAttribute:
+                        generateProperty = false;
                         break;
                     case NotifyPropertyChangedAttribute:
                         notifyPropertyChanged = (bool?) attribute.ConstructorArguments[0].Value ?? true;
@@ -509,42 +691,6 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                         break;
                     case VirtualPropertyAttribute:
                         virtualProperty = true;
-                        break;
-                    case RangeAttribute when attribute.AttributeConstructor is not null
-                                             && attribute.ConstructorArguments.Length is 2 or 3:
-                    {
-                        var first = attribute.AttributeConstructor.Parameters[0].Type.ToDisplayString();
-                        switch (first)
-                        {
-                            case "double":
-                            {
-                                var from = attribute.ConstructorArguments[0].Value?.ToString().Replace(',', '.')
-                                           ?? "0.0";
-                                var to = attribute.ConstructorArguments[1].Value?.ToString().Replace(',', '.') ?? "0.0";
-                                range = (first, from, to);
-                                break;
-                            }
-                            case "int":
-                            {
-                                var from = attribute.ConstructorArguments[0].Value?.ToString() ?? "0";
-                                var to   = attribute.ConstructorArguments[1].Value?.ToString() ?? "0";
-                                range = (first, from, to);
-                                break;
-                            }
-                            case "System.Type" when attribute.ConstructorArguments.Length is 3:
-                            {
-                                var from = attribute.ConstructorArguments[1].Value?.ToString() ?? "0";
-                                var to   = attribute.ConstructorArguments[2].Value?.ToString() ?? "0";
-                                range = (first, from, to);
-                                break;
-                            }
-                            default: continue;
-                        }
-
-                        break;
-                    }
-                    case MaxLengthAttribute when attribute.ConstructorArguments.Length is 1:
-                        maxLength = (int) (attribute.ConstructorArguments[0].Value ?? 0);
                         break;
                     case EqualityCheckAttribute:
                     {
@@ -584,17 +730,19 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
 
             return new GenInfo
             {
-                Generate       = generateProperty,
-                NotifyPropertyChanged  = notifyPropertyChanged,
-                NotifyPropertyChanging = notifyPropertyChanging,
-                ValidationStrategy     = validationStrategy,
-                PropertyName           = propertyName,
-                PropertyEncapsulation  = propertyEncapsulation,
-                VirtualProperty        = virtualProperty,
-                Range                  = range,
-                MaxLength              = maxLength,
-                EqualityCheck          = equalityCheck,
-                GuardMethods           = guardMethods
+                Generate                 = generateProperty,
+                NotifyPropertyChanged    = notifyPropertyChanged,
+                NotifyPropertyChanging   = notifyPropertyChanging,
+                ValidationStrategy       = validationStrategy,
+                PropertyName             = propertyName,
+                PropertyEncapsulation    = propertyEncapsulation,
+                VirtualProperty          = virtualProperty,
+                Range                    = range,
+                MaxLength                = maxLength,
+                EqualityCheck            = equalityCheck,
+                GuardMethods             = guardMethods,
+                PropertyAttributes       = propertyAttributes,
+                DisableAttributeTakeover = disableAttributeTakeover
             };
         }
 
@@ -624,14 +772,24 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
             // 'Identifier' means the token of the node. Get class name from the syntax node.
             var className = classDeclarationSyntax.Identifier.Text;
 
+            var usingStrings = new HashSet<string> { "using System;", "using System.Collections.Generic;" };
+            if (classDeclarationSyntax.Parent is BaseNamespaceDeclarationSyntax namespaceDeclarationSyntax)
+            {
+                usingStrings.AddRange(namespaceDeclarationSyntax.Usings.Select((q) => q.ToString()));
+                if (namespaceDeclarationSyntax.Parent is CompilationUnitSyntax compilationUnitSyntax)
+                    usingStrings.AddRange(compilationUnitSyntax.Usings.Select((q) => q.ToString()));
+            }
+            else if (classDeclarationSyntax.Parent is CompilationUnitSyntax compilationUnitSyntax)
+                usingStrings.AddRange(compilationUnitSyntax.Usings.Select((q) => q.ToString()));
+
             var defaultGenInfo = GetGenerationInfo(classSymbol.GetAttributes());
 
             // Go through all fields of the class.
             var builder = new StringBuilder();
             builder.AppendLine("// <auto-generated/>");
             builder.AppendLine($"#nullable enable");
-            builder.AppendLine($"using System;");
-            builder.AppendLine($"using System.Collections.Generic;");
+            foreach (var usingDirectiveSyntax in usingStrings)
+                builder.AppendLine(usingDirectiveSyntax);
             builder.AppendLine();
             builder.AppendLine($"namespace {namespaceName};");
             builder.AppendLine($"partial class {className}");
@@ -655,11 +813,14 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
 
             foreach (var fieldSymbol in classSymbol.GetMembers().OfType<IFieldSymbol>())
             {
-                var currentGenInfo = GetGenerationInfo(fieldSymbol.GetAttributes()).WithDefaults(defaultGenInfo);
+                var fieldGenInfo   = GetGenerationInfo(fieldSymbol.GetAttributes());
+                var currentGenInfo = fieldGenInfo.WithDefaults(defaultGenInfo);
                 if (!currentGenInfo.GenerateProperty())
                     continue;
                 var propertyName = currentGenInfo.PropertyName ?? NormalizeFieldName(fieldSymbol.Name);
                 var propertyType = fieldSymbol.Type.ToDisplayString();
+                WriteOutInheritedAttributes(currentGenInfo, builder);
+                WriteOutAttributes(currentGenInfo, builder);
                 builder.Append("    "); // Indentation.
                 builder.Append(
                     currentGenInfo.PropertyEncapsulation switch
@@ -700,6 +861,22 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
 
             // Add the source code to the compilation.
             context.AddSource($"{className}.g.cs", SourceText.From(builder.ToString(), Encoding.UTF8));
+        }
+    }
+
+    private static void WriteOutInheritedAttributes(GenInfo currentGenInfo, StringBuilder builder)
+    {
+        foreach (var attribute in currentGenInfo.DisableAttributeTakeover?.attributes ?? Enumerable.Empty<string>())
+        {
+            builder.AppendLine($"    {attribute}");
+        }
+    }
+
+    private static void WriteOutAttributes(GenInfo currentGenInfo, StringBuilder builder)
+    {
+        foreach (var attribute in currentGenInfo.PropertyAttributes?.attributes ?? Enumerable.Empty<string>())
+        {
+            builder.AppendLine($"    {attribute}");
         }
     }
 

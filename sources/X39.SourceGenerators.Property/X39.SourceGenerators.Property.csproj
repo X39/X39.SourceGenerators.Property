@@ -45,6 +45,7 @@
         </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.5.0" />
+        <PackageReference Include="X39.Util" Version="1.0.0.40" />
     </ItemGroup>
 
     <ItemGroup>

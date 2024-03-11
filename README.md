@@ -7,40 +7,49 @@
   * [Rider does not recognize the source generator](#rider-does-not-recognize-the-source-generator)
 * [When and how are properties generated?](#when-and-how-are-properties-generated)
 * [Attributes](#attributes)
-  * [`GeneratePropertiesAttribute`](#generatepropertiesattribute)
+  * [`GeneratePropertiesAttribute` (class | field)](#generatepropertiesattribute-class--field)
     * [On the class](#on-the-class)
     * [On the field](#on-the-field)
-  * [`NotifyPropertyChangedAttribute`](#notifypropertychangedattribute)
+  * [`DisableAttributeTakeoverAttribute` (class | field)](#disableattributetakeoverattribute-class--field)
+    * [On the class](#on-the-class-1)
+    * [On the field](#on-the-field-1)
+  * [`NoPropertyAttribute` (field)](#nopropertyattribute-field)
+    * [On the field](#on-the-field-2)
+  * [`PropertyAttributeAttribute` (class | field)](#propertyattributeattribute-class--field)
+    * [On the class](#on-the-class-2)
+    * [On the field (inherit: false)](#on-the-field-inherit-false)
+    * [On the field (inherit: true)](#on-the-field-inherit-true)
+  * [`NotifyPropertyChangedAttribute` (class | field)](#notifypropertychangedattribute-class--field)
     * [On the class with true](#on-the-class-with-true)
     * [On the class with false](#on-the-class-with-false)
     * [On the field with true](#on-the-field-with-true)
     * [On the field with false](#on-the-field-with-false)
-  * [`NotifyPropertyChangingAttribute`](#notifypropertychangingattribute)
+  * [`NotifyPropertyChangingAttribute` (class | field)](#notifypropertychangingattribute-class--field)
     * [On the class with true](#on-the-class-with-true-1)
     * [On the class with false](#on-the-class-with-false-1)
     * [On the field with true](#on-the-field-with-true-1)
     * [On the field with false](#on-the-field-with-false-1)
-  * [`PropertyNameAttribute`](#propertynameattribute)
-    * [On the field](#on-the-field-1)
-  * [`ValidationStrategyAttribute`](#validationstrategyattribute)
+  * [`PropertyNameAttribute` (field)](#propertynameattribute-field)
+    * [On the field](#on-the-field-3)
+  * [`ValidationStrategyAttribute` (class | field)](#validationstrategyattribute-class--field)
     * [Supported Validations](#supported-validations)
     * [Available Strategies](#available-strategies)
     * [On the class  (`EValidationStrategy.Exception`)](#on-the-class-evalidationstrategyexception)
     * [On the field (`EValidationStrategy.Exception`)](#on-the-field-evalidationstrategyexception)
     * [On the class  (`EValidationStrategy.Rollback`)](#on-the-class-evalidationstrategyrollback)
     * [On the class  (`EValidationStrategy.Ignore`)](#on-the-class-evalidationstrategyignore)
-  * [`PropertyEncapsulationAttribute`](#propertyencapsulationattribute)
-    * [On the field](#on-the-field-2)
-  * [`VirtualPropertyAttribute`](#virtualpropertyattribute)
-    * [On the field](#on-the-field-3)
-  * [`EqualityCheckAttribute`](#equalitycheckattribute)
+  * [`PropertyEncapsulationAttribute` (field)](#propertyencapsulationattribute-field)
+    * [On the field](#on-the-field-4)
+  * [`VirtualPropertyAttribute` (field)](#virtualpropertyattribute-field)
+    * [On the field](#on-the-field-5)
+  * [`EqualityCheckAttribute` (class | field)](#equalitycheckattribute-class--field)
     * [Supported Equality Modes](#supported-equality-modes)
     * [On the class  (`EEqualityCheckMode.Default`)](#on-the-class-eequalitycheckmodedefault)
     * [On the class  (`EEqualityCheckMode.Custom`)](#on-the-class-eequalitycheckmodecustom)
     * [On the class  (`EEqualityCheckMode.None`)](#on-the-class-eequalitycheckmodenone)
     * [On the field  (`EEqualityCheckMode.Default`)](#on-the-field-eequalitycheckmodedefault)
-  * [`GuardAttribute`](#guardattribute)
-    * [On the field](#on-the-field-4)
+  * [`GuardAttribute` (field)](#guardattribute-field)
+    * [On the field](#on-the-field-6)
 * [Project Notes](#project-notes)
   * [Building](#building)
   * [Test coverage](#test-coverage)
@@ -53,6 +62,13 @@
 # X39.SourceGenerators.Property
 
 This library adds a source generator that generates properties for a given class.
+
+By default, any property put onto a field will also be taken over to the generated property.
+You can use the [`DisableAttributeTakeoverAttribute`](#disableattributetakeoverattribute-class--field) to disable this
+behavior.
+
+To enable the source generator for a class, you have to add one of the class-level attributes to the class (
+See [Attributes](#Attributes)).
 
 # Quick Start
 
@@ -141,7 +157,7 @@ Some attributes are placeable on either the class or field.
 If the attribute is placed on the class, the attribute will be taken as a default for all fields.
 This also implies that the field attributes always take precedence over the class attributes.
 
-## `GeneratePropertiesAttribute`
+## `GeneratePropertiesAttribute` (class | field)
 
 This attribute will make the source generator generate properties if no other attribute is desired.
 
@@ -197,7 +213,220 @@ public partial class MyClass
 }
 ```
 
-## `NotifyPropertyChangedAttribute`
+## `DisableAttributeTakeoverAttribute` (class | field)
+
+This attribute will make the source generator not take over any attributes from the field to the property.
+If the attribute is placed on the class, the source generator will not take over any attributes from any field.
+If the attribute is placed on the field, the source generator will not take over any attributes from the specific field
+only.
+
+By default, the source generator will take over any attribute from the field to the property.
+
+### On the class
+
+```csharp
+// User-Code
+[DisableAttributeTakeover]
+public partial class MyClass
+{
+    [MyFancyAttribute]
+    private int _myProperty;
+}
+
+// Generated-Code
+public partial class MyClass
+{
+    [MyFancyAttribute]
+    public int MyProperty
+    {
+        get => _myProperty;
+        set
+        {
+            if (_myProperty == value)
+                return;
+            _myProperty = value;
+        }
+    }
+}
+```
+
+### On the field
+
+```csharp
+// User-Code
+public partial class MyClass
+{
+    [DisableAttributeTakeover]
+    [MyFancyAttribute]
+    private int _myProperty1;
+    
+    [MyFancyAttribute]
+    private int _myProperty2;
+}
+
+// Generated-Code
+public partial class MyClass
+{
+    public int MyProperty1
+    {
+        get => _myProperty1;
+        set
+        {
+            if (_myProperty1 == value)
+                return;
+            _myProperty1 = value;
+        }
+    }
+    
+    [MyFancyAttribute]
+    public int MyProperty2
+    {
+        get => _myProperty2;
+        set
+        {
+            if (_myProperty2 == value)
+                return;
+            _myProperty2 = value;
+        }
+    }
+}
+```
+
+## `NoPropertyAttribute` (field)
+
+This attribute will make the source generator not generate a property for the field.
+It cannot be placed on the class.
+
+### On the field
+
+```csharp
+// User-Code
+public partial class MyClass
+{
+    private int _myProperty1;
+    
+    [NoProperty]
+    private int _myProperty2;
+}
+
+// Generated-Code
+public partial class MyClass
+{
+    public int MyProperty1
+    {
+        get => _myProperty1;
+        set
+        {
+            if (_myProperty1 == value)
+                return;
+            _myProperty1 = value;
+        }
+    }
+}
+```
+
+## `PropertyAttributeAttribute` (class | field)
+
+This attribute will make the source generator add the given attribute to the generated property.
+If applied to the class, the attribute will be added to all properties.
+A field attribute by default takes precedence over the class attribute, using the `inherit` parameter, the field
+attribute can be instructed to inherit the class attribute if desired.
+
+### On the class
+
+```csharp
+// User-Code
+[PropertyAttribute("Required")]
+[PropertyAttribute("[Required]")]
+[PropertyAttribute("[Required, Range(0, 10)]")]
+public partial class MyClass
+{
+    private int _myProperty;
+}
+
+// Generated-Code
+public partial class MyClass
+{
+    [Required]
+    [Required]
+    [Required, Range(0, 10)]
+    public int MyProperty
+    {
+        get => _myProperty;
+        set
+        {
+            if (_myProperty == value)
+                return;
+            _myProperty = value;
+        }
+    }
+}
+```
+
+### On the field (inherit: false)
+
+```csharp
+// User-Code
+[PropertyAttribute("MaxLenght(10)")]
+public partial class MyClass
+{
+    [PropertyAttribute("Required")]
+    [PropertyAttribute("[Required]")]
+    [PropertyAttribute("[Required, Range(0, 10)]")]
+    private int _myProperty;
+}
+
+// Generated-Code
+public partial class MyClass
+{
+    [Required]
+    [Required]
+    [Required, Range(0, 10)]
+    public int MyProperty
+    {
+        get => _myProperty;
+        set
+        {
+            if (_myProperty == value)
+                return;
+            _myProperty = value;
+        }
+    }
+}
+```
+
+### On the field (inherit: true)
+
+```csharp
+// User-Code
+[PropertyAttribute("MaxLenght(10)")]
+public partial class MyClass
+{
+    [PropertyAttribute("Required", inherit: true)]
+    [PropertyAttribute("Range(0, 10)"]
+    private int _myProperty;
+}
+
+// Generated-Code
+public partial class MyClass
+{
+    [Required]
+    [MaxLenght(10)]
+    [Range(0, 10)]
+    public int MyProperty
+    {
+        get => _myProperty;
+        set
+        {
+            if (_myProperty == value)
+                return;
+            _myProperty = value;
+        }
+    }
+}
+```
+
+## `NotifyPropertyChangedAttribute` (class | field)
 
 This attribute will make the source generator add a `PropertyChanged` event call to the setter of the property.
 If the attribute is placed on the class and the parameter is set to `true` (default: `false`),
@@ -314,7 +543,7 @@ public partial class MyClass
 }
 ```
 
-## `NotifyPropertyChangingAttribute`
+## `NotifyPropertyChangingAttribute` (class | field)
 
 This attribute will make the source generator add a `PropertyChanging` event call to the setter of the property.
 If the attribute is placed on the class and the parameter is set to `true` (default: `false`),
@@ -431,7 +660,7 @@ public partial class MyClass
 }
 ```
 
-## `PropertyNameAttribute`
+## `PropertyNameAttribute` (field)
 
 This attribute will make the source generator use the given name as the property name.
 It cannot be placed on the class.
@@ -462,7 +691,7 @@ public partial class MyClass
 }
 ```
 
-## `ValidationStrategyAttribute`
+## `ValidationStrategyAttribute` (class | field)
 
 The validation strategy attribute is used to define how additional, validating properties should be handled, when
 the validation fails.
@@ -471,7 +700,7 @@ the validation fails.
 
 - `System.ComponentModel.DataAnnotations.RangeAttribute`
 - `System.ComponentModel.DataAnnotations.MaxLengthAttribute`
-- [`GuardAttribute`](#GuardAttribute)
+- [`GuardAttribute`](#guardattribute-field)
 
 ### Available Strategies
 
@@ -609,7 +838,7 @@ public partial class MyClass
 }
 ```
 
-## `PropertyEncapsulationAttribute`
+## `PropertyEncapsulationAttribute` (field)
 
 This attribute will make the source generator encapsulate the property with the given access modifier.
 It cannot be placed on the class.
@@ -648,7 +877,7 @@ public partial class MyClass
 }
 ```
 
-## `VirtualPropertyAttribute`
+## `VirtualPropertyAttribute` (field)
 
 This attribute will make the source generator generate a virtual property.
 It cannot be placed on the class.
@@ -679,7 +908,7 @@ public partial class MyClass
 }
 ```
 
-## `EqualityCheckAttribute`
+## `EqualityCheckAttribute` (class | field)
 
 This attribute will change how or if the equality check is performed.
 
@@ -801,10 +1030,11 @@ public partial class MyClass
 }
 ```
 
-## `GuardAttribute`
+## `GuardAttribute` (field)
 
 The guard attribute allows to make the source generator use custom validation methods to validate the property.
-See the [`ValidationStrategyAttribute`](#ValidationStrategyAttribute) for more information on how to change validation
+See the [`ValidationStrategyAttribute`](#validationstrategyattribute-class--field) for more information on how to change
+validation
 handling.
 It cannot be placed on the class.
 
