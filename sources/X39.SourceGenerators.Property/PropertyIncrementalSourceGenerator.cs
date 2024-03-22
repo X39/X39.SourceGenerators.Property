@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using X39.Util.Collections;
 
 namespace X39.SourceGenerators.Property;
 
@@ -624,7 +624,8 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                             {
                                 if (i > 0)
                                     builder.Append(", ");
-                                builder.Append(Convert.ToString(attribute.ConstructorArguments[i].Value, CultureInfo.InvariantCulture));
+                                var csharp = attribute.ConstructorArguments[i].ToCSharp();
+                                builder.Append(csharp);
                             }
 
                             builder.Append(')');
@@ -775,12 +776,15 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
             var usingStrings = new HashSet<string> { "using System;", "using System.Collections.Generic;" };
             if (classDeclarationSyntax.Parent is BaseNamespaceDeclarationSyntax namespaceDeclarationSyntax)
             {
-                usingStrings.AddRange(namespaceDeclarationSyntax.Usings.Select((q) => q.ToString()));
+                foreach (var s in namespaceDeclarationSyntax.Usings.Select((q) => q.ToString()))
+                    usingStrings.Add(s);
                 if (namespaceDeclarationSyntax.Parent is CompilationUnitSyntax compilationUnitSyntax)
-                    usingStrings.AddRange(compilationUnitSyntax.Usings.Select((q) => q.ToString()));
+                    foreach (var s in compilationUnitSyntax.Usings.Select((q) => q.ToString()))
+                        usingStrings.Add(s);
             }
             else if (classDeclarationSyntax.Parent is CompilationUnitSyntax compilationUnitSyntax)
-                usingStrings.AddRange(compilationUnitSyntax.Usings.Select((q) => q.ToString()));
+                foreach (var s in compilationUnitSyntax.Usings.Select((q) => q.ToString()))
+                    usingStrings.Add(s);
 
             var defaultGenInfo = GetGenerationInfo(classSymbol.GetAttributes());
 

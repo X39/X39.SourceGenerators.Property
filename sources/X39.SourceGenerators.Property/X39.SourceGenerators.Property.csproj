@@ -29,32 +29,31 @@
         <AnalysisLevel>latest-recommended</AnalysisLevel>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
-
     <ItemGroup>
         <None Include="..\..\README.md">
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>
         </None>
-        <None Remove="Properties\launchSettings.json" />
+        <None Remove="Properties\launchSettings.json"/>
     </ItemGroup>
-
     <ItemGroup>
+        <!-- !IMPORTANT! There should only be 3 references in this group: -->
+        <!-- * Microsoft.CodeAnalysis.Analyzers -->
+        <!-- * Microsoft.CodeAnalysis.CSharp -->
+        <!-- * Microsoft.CodeAnalysis.CSharp.Workspaces -->
+        <!-- Any other references will cause the generator to fault -->
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.5.0" />
-        <PackageReference Include="X39.Util" Version="1.0.0.40" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.5.0"/>
     </ItemGroup>
-
     <ItemGroup>
-        <Folder Include="Properties\" />
+        <Folder Include="Properties\"/>
     </ItemGroup>
-
     <ItemGroup>
         <!-- Package the generator in the analyzer directory of the nuget package -->
-        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
     </ItemGroup>
-
 </Project>
