@@ -1480,7 +1480,7 @@ public class PropertyIncrementalSourceGeneratorTests
                                                    /// </remarks>
                                                    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
                                                    [CompilerGenerated]
-                                                   public class NotifyPropertyChangedAttribute : Attribute
+                                                   internal class NotifyPropertyChangedAttribute : Attribute
                                                    {
                                                        public bool GenerateEvent { get; }
                                                
@@ -1515,7 +1515,7 @@ public class PropertyIncrementalSourceGeneratorTests
                                                    /// </remarks>
                                                    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
                                                    [CompilerGenerated]
-                                                   public class NotifyPropertyChangingAttribute : Attribute
+                                                   internal class NotifyPropertyChangingAttribute : Attribute
                                                    {
                                                        public bool GenerateEvent { get; }
                                                
@@ -1580,7 +1580,7 @@ public class PropertyIncrementalSourceGeneratorTests
                                                    /// <seealso cref="System.ComponentModel.DataAnnotations.RangeAttribute"/>
                                                    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
                                                    [CompilerGenerated]
-                                                   public class ValidationStrategyAttribute : Attribute
+                                                   internal class ValidationStrategyAttribute : Attribute
                                                    {
                                                        public EValidationStrategy Strategy { get; }
                                                
@@ -1601,7 +1601,7 @@ public class PropertyIncrementalSourceGeneratorTests
                                                    /// </summary>
                                                    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
                                                    [CompilerGenerated]
-                                                   public class PropertyNameAttribute : Attribute
+                                                   internal class PropertyNameAttribute : Attribute
                                                    {
                                                        public string Name { get; }
                                                
@@ -1622,7 +1622,7 @@ public class PropertyIncrementalSourceGeneratorTests
                                                    /// </remarks>
                                                    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
                                                    [CompilerGenerated]
-                                                   public class PropertyAttributeAttribute : Attribute
+                                                   internal class PropertyAttributeAttribute : Attribute
                                                    {
                                                        public string AttributeDefinition { get; }
                                                        public bool Inherit { get; }
@@ -1656,7 +1656,7 @@ public class PropertyIncrementalSourceGeneratorTests
                                                    /// </summary>
                                                    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
                                                    [CompilerGenerated]
-                                                   public class DisableAttributeTakeoverAttribute : Attribute { }
+                                                   internal class DisableAttributeTakeoverAttribute : Attribute { }
                                                    
                                                    /// <summary>
                                                    /// Enum containing the possible property encapsulation strategies for the <see cref="PropertyEncapsulationAttribute"/>.
@@ -1697,7 +1697,7 @@ public class PropertyIncrementalSourceGeneratorTests
                                                    /// </summary>
                                                    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
                                                    [CompilerGenerated]
-                                                   public class PropertyEncapsulationAttribute : Attribute
+                                                   internal class PropertyEncapsulationAttribute : Attribute
                                                    {
                                                        public EPropertyEncapsulation Encapsulation { get; }
                                                
@@ -1716,14 +1716,14 @@ public class PropertyIncrementalSourceGeneratorTests
                                                    /// </summary>
                                                    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
                                                    [CompilerGenerated]
-                                                   public class VirtualPropertyAttribute : Attribute { }
+                                                   internal class VirtualPropertyAttribute : Attribute { }
                                                
                                                    /// <summary>
                                                    /// Allows changing the equality check for a property or disabling it entirely.
                                                    /// </summary>
                                                    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
                                                    [CompilerGenerated]
-                                                   public class EqualityCheckAttribute : Attribute
+                                                   internal class EqualityCheckAttribute : Attribute
                                                    {
                                                        public EEqualityCheckMode Mode          { get; }
                                                        public float              FloatEpsilon  { get; }
@@ -1790,7 +1790,7 @@ public class PropertyIncrementalSourceGeneratorTests
                                                    /// </remarks>
                                                    [AttributeUsage(AttributeTargets.Field, AllowMultiple = true, Inherited = false)]
                                                    [CompilerGenerated]
-                                                   public class GuardAttribute : Attribute
+                                                   internal class GuardAttribute : Attribute
                                                    {
                                                        public string MethodName { get; }
                                                
@@ -1813,7 +1813,7 @@ public class PropertyIncrementalSourceGeneratorTests
                                                    /// </summary>
                                                    [CompilerGenerated]
                                                    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
-                                                   public class GeneratePropertiesAttribute : Attribute
+                                                   internal class GeneratePropertiesAttribute : Attribute
                                                    {
                                                        
                                                    }
@@ -1823,7 +1823,7 @@ public class PropertyIncrementalSourceGeneratorTests
                                                    /// </summary>
                                                    [CompilerGenerated]
                                                    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
-                                                   public class NoPropertyAttribute : Attribute
+                                                   internal class NoPropertyAttribute : Attribute
                                                    {
                                                        
                                                    }
