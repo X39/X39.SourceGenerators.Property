@@ -817,6 +817,8 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
 
             foreach (var fieldSymbol in classSymbol.GetMembers().OfType<IFieldSymbol>())
             {
+                if (fieldSymbol.Name.Length > 0 && fieldSymbol.Name[0] == '<')
+                    continue;
                 var fieldGenInfo   = GetGenerationInfo(fieldSymbol.GetAttributes());
                 var currentGenInfo = fieldGenInfo.WithDefaults(defaultGenInfo);
                 if (!currentGenInfo.GenerateProperty())
