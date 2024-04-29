@@ -136,6 +136,8 @@ The properties are generated when one of the (Attributes)[#Attributes] is placed
 The source generator will then generate a partial class with the same name as the original class and add the properties
 to it.
 
+### Propety Name
+
 The property **name** will be the name of the field with the first letter capitalized and an optional underscore
 removed.
 Additionally, if the field is suffixed with `Field`, the suffix will be removed too.
@@ -143,13 +145,25 @@ See (`PropertyNameAttribute`)[#PropertyNameAttribute] to customize the property 
 
 For a more "example driven" approach to this explanation, see the following table:
 
-| Field Name | Property Name |
-|------------|---------------|
-| _abc       | Abc           |
-| _abcField  | Abc           |
-| abc        | Abc           |
-| __abc      | _abc          |
-| _abc_      | Abc_          |
+| Field Name  | Property Name |
+|-------------|---------------|
+| `_abc`      | `Abc`         |
+| `_abcField` | `Abc`         |
+| `abc`       | `Abc`         |
+| `__abc`     | `_abc`        |
+| `_abc_`     | `Abc_`        |
+
+### `readonly` handling
+If the field is `readonly`, the property will be `readonly` too.
+What this means is that the property will be created
+with a normal `get` getter and a `init` setter.
+
+See [`SetterAttribute`](#SetterAttribute) to customize whether the setter
+should be generated at all.
+
+Similarly, see [`GetterAttribute`](#GetterAttribute) to customize whether the getter
+should be generated at all.
+
 
 # Attributes
 
@@ -209,6 +223,183 @@ public partial class MyClass
                 return;
             _myProperty = value;
         }
+    }
+}
+```
+
+## `GetterAttribute` (field)
+
+This attribute allows to customize the getter of a property.
+It has two modes available:
+- `EGetterMode.Default`
+  This mode will leave the variant of the getter to the source generator.
+  *This is the default mode.*
+- `EGetterMode.None`
+  This mode will not generate a getter for the property.
+
+It cannot be placed on the class.
+
+### On the field
+
+```csharp
+// User-Code
+public partial class MyClass
+{
+    [Getter(EGetterMode.None)]
+    private int _myProperty;
+}
+
+// Generated-Code
+public partial class MyClass
+{
+    public int MyProperty
+    {
+        set
+        {
+            if (_myProperty == value)
+                return;
+            _myProperty = value;
+        }
+    }
+}
+```
+
+## `SetterAttribute` (field)
+
+This attribute allows to customize the setter of a property.
+It has four modes available:
+- `ESetterMode.Default`
+  This mode will leave the variant of the setter to the source generator.
+  *This is the default mode.*
+- `ESetterMode.Set`
+  This mode will generate a setter for the property.
+  **Warning:** Using this mode on a `readonly` field will result in a compiler error.
+- `ESetterMode.Init`
+  This mode will generate an `init` setter for the property.
+  Init setters will not generate equality checks or notify property changing/-ed events.
+- `ESetterMode.None`
+  This mode will not generate a setter for the property.
+
+It cannot be placed on the class.
+
+### On the field (`ESetterMode.Default`)
+
+```csharp
+// User-Code
+public partial class MyClass
+{
+    [Setter(ESetterMode.Default)]
+    private int _myProperty1;
+    
+    [Setter(ESetterMode.Default)]
+    private readonly int _myProperty2;
+}
+
+// Generated-Code
+public partial class MyClass
+{
+    public int MyProperty1
+    {
+        get => _myProperty1;
+        set
+        {
+            if (_myProperty1 == value)
+                return;
+            _myProperty1 = value;
+        }
+    }
+    
+    public int MyProperty2
+    {
+        get => _myProperty2;
+        init
+        {
+            _myProperty2 = value;
+        }
+    }
+}
+```
+
+### On the field (`ESetterMode.Set`)
+
+```csharp
+// User-Code
+public partial class MyClass
+{
+    [Setter(ESetterMode.Set)]
+    private int _myProperty1;
+    
+    [Setter(ESetterMode.Set)]
+    private readonly int _myProperty2;
+}
+
+// Generated-Code
+public partial class MyClass
+{
+    public int MyProperty1
+    {
+        get => _myProperty1;
+        set
+        {
+            if (_myProperty1 == value)
+                return;
+            _myProperty1 = value;
+        }
+    }
+    
+    public int MyProperty2
+    {
+        get => _myProperty2;
+        set
+        {
+            if (_myProperty2 == value)
+                return;
+            _myProperty2 = value;
+        }
+    }
+}
+```
+
+### On the field (`ESetterMode.Init`)
+
+```csharp
+// User-Code
+public partial class MyClass
+{
+    [Setter(ESetterMode.Init)]
+    private int _myProperty;
+}
+
+// Generated-Code
+public partial class MyClass
+{
+    public int MyProperty
+    {
+        get => _myProperty;
+        init
+        {
+            _myProperty = value;
+        }
+    }
+}
+```
+
+### On the field (`ESetterMode.None`)
+
+```csharp
+// User-Code
+public partial class MyClass
+{
+    [Setter(ESetterMode.None)]
+    private int _myProperty;
+}
+
+// Generated-Code
+public partial class MyClass
+{
+    public int MyProperty
+    {
+        get => _myProperty;
     }
 }
 ```

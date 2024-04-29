@@ -22,6 +22,8 @@ internal sealed class GenInfo
     public List<(string methodName, string? className)>                     GuardMethods { get; set; } = new();
     public (List<string> attributes, bool inherit)?                         PropertyAttributes { get; set; }
     public (List<string> attributes, bool inherit)?                         DisableAttributeTakeover { get; set; }
+    public ESetterMode                                                      SetterMode { get; set; }
+    public EGetterMode                                                      GetterMode { get; set; }
 
     public GenInfo WithDefaults(GenInfo defaultGenInfo)
     {
@@ -46,13 +48,16 @@ internal sealed class GenInfo
                         ? (new List<string>(), false)
                         : DisableAttributeTakeover,
             PropertyAttributes = (PropertyAttributes?.inherit ?? true)
-                ? ((PropertyAttributes?.attributes ?? Enumerable.Empty<string>()).Concat(
-                                                       defaultGenInfo.PropertyAttributes?.attributes ?? Enumerable.Empty<string>()
-                                                   )
-                                                   .ToList(), true)
+                ? (
+                    (PropertyAttributes?.attributes ?? Enumerable.Empty<string>()).Concat(
+                        defaultGenInfo.PropertyAttributes?.attributes ?? Enumerable.Empty<string>()
+                    )
+                    .ToList(), true)
                 : PropertyAttributes is null && defaultGenInfo.PropertyAttributes is not null
                     ? (new List<string>(), false)
                     : PropertyAttributes,
+            GetterMode = GetterMode,
+            SetterMode = SetterMode,
         };
     }
 
