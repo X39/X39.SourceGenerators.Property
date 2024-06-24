@@ -538,7 +538,7 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
         var classSyntaxProvider = context
             .SyntaxProvider
             .CreateSyntaxProvider(
-                (s,   _) => s is ClassDeclarationSyntax,
+                (s, _) => s is ClassDeclarationSyntax,
                 (ctx, _) => GetClassDeclarationForSourceGen(ctx)
             )
             .Where(t => t.generateProperty)
@@ -649,28 +649,28 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
     /// <param name="compilation">Compilation used to provide access to the Semantic Model.</param>
     /// <param name="classDeclarations">Nodes annotated with the [Report] attribute that trigger the generate action.</param>
     private static void GenerateCode(
-        SourceProductionContext                context,
-        Compilation                            compilation,
+        SourceProductionContext context,
+        Compilation compilation,
         ImmutableArray<ClassDeclarationSyntax> classDeclarations
     )
     {
         GenInfo GetGenerationInfo(IReadOnlyCollection<AttributeData> attributes)
         {
-            bool?                                                            generateProperty         = null;
-            bool?                                                            notifyPropertyChanged    = null;
-            bool?                                                            notifyPropertyChanging   = null;
-            string?                                                          validationStrategy       = null;
-            string?                                                          propertyName             = null;
-            string?                                                          propertyEncapsulation    = null;
-            bool?                                                            virtualProperty          = null;
-            (string type, string from, string to)?                           range                    = null;
-            int?                                                             maxLength                = null;
-            (string mode, string epsilonF, string epsilonD, string? custom)? equalityCheck            = null;
-            (List<string> attributes, bool inherit)?                         propertyAttributes       = null;
-            (List<string> attributes, bool inherit)?                         disableAttributeTakeover = null;
-            List<(string methodName, string? className)>                     guardMethods             = new();
-            EGetterMode                                                      getterMode               = default;
-            ESetterMode                                                      setterMode               = default;
+            bool? generateProperty = null;
+            bool? notifyPropertyChanged = null;
+            bool? notifyPropertyChanging = null;
+            string? validationStrategy = null;
+            string? propertyName = null;
+            string? propertyEncapsulation = null;
+            bool? virtualProperty = null;
+            (string type, string from, string to)? range = null;
+            int? maxLength = null;
+            (string mode, string epsilonF, string epsilonD, string? custom)? equalityCheck = null;
+            (List<string> attributes, bool inherit)? propertyAttributes = null;
+            (List<string> attributes, bool inherit)? disableAttributeTakeover = null;
+            List<(string methodName, string? className)> guardMethods = new();
+            EGetterMode getterMode = default;
+            ESetterMode setterMode = default;
 
             foreach (var attribute in attributes)
             {
@@ -682,7 +682,7 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                     case RangeAttribute when attribute.AttributeConstructor is not null
                                              && attribute.ConstructorArguments.Length is 2 or 3:
                     {
-                        var    first = attribute.AttributeConstructor.Parameters[0].Type.ToDisplayString();
+                        var first = attribute.AttributeConstructor.Parameters[0].Type.ToDisplayString();
                         string rangeAttribute;
                         switch (first)
                         {
@@ -698,7 +698,7 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                             case "int":
                             {
                                 var from = attribute.ConstructorArguments[0].Value?.ToString() ?? "0";
-                                var to   = attribute.ConstructorArguments[1].Value?.ToString() ?? "0";
+                                var to = attribute.ConstructorArguments[1].Value?.ToString() ?? "0";
                                 range          = (first, from, to);
                                 rangeAttribute = $"[{attributeName}({from}, {to})]";
                                 break;
@@ -706,19 +706,20 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                             case "System.Type" when attribute.ConstructorArguments.Length is 3:
                             {
                                 var from = attribute.ConstructorArguments[1].Value?.ToString() ?? "0";
-                                var to   = attribute.ConstructorArguments[2].Value?.ToString() ?? "0";
+                                var to = attribute.ConstructorArguments[2].Value?.ToString() ?? "0";
                                 range = (first, from, to);
                                 rangeAttribute =
                                     $"[{attributeName}(typeof({attribute.ConstructorArguments[0].Value}), \"{from.Replace("\"", "\\\"")}\", \"{to}\")]";
                                 break;
                             }
-                            default: continue;
+                            default:
+                                continue;
                         }
 
                         disableAttributeTakeover = disableAttributeTakeover is null
                             ? (new List<string> { rangeAttribute }, false)
                             : (disableAttributeTakeover.Value.attributes.Append(rangeAttribute).ToList(),
-                               disableAttributeTakeover.Value.inherit);
+                                disableAttributeTakeover.Value.inherit);
                         break;
                     }
                     case MaxLengthAttribute when attribute.ConstructorArguments.Length is 1:
@@ -747,14 +748,14 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                         disableAttributeTakeover = disableAttributeTakeover is null
                             ? (new List<string> { builder.ToString() }, false)
                             : (disableAttributeTakeover.Value.attributes.Append(builder.ToString()).ToList(),
-                               disableAttributeTakeover.Value.inherit);
+                                disableAttributeTakeover.Value.inherit);
                         break;
                     }
                     case GetterAttribute:
-                        getterMode = (EGetterMode) (int)attribute.ConstructorArguments[0].Value;
+                        getterMode = (EGetterMode) (int) attribute.ConstructorArguments[0].Value;
                         break;
                     case SetterAttribute:
-                        setterMode = (ESetterMode) (int)attribute.ConstructorArguments[0].Value;
+                        setterMode = (ESetterMode) (int) attribute.ConstructorArguments[0].Value;
                         break;
                     case DisableAttributeTakeoverAttribute:
                         disableAttributeTakeover = disableAttributeTakeover is null
@@ -783,8 +784,8 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                         else
                         {
                             propertyAttributes.Value.attributes.Add(name);
-                            propertyAttributes = (
-                                propertyAttributes.Value.attributes, propertyAttributes.Value.inherit || inherit);
+                            propertyAttributes = (propertyAttributes.Value.attributes,
+                                propertyAttributes.Value.inherit || inherit);
                         }
 
                         break;
@@ -947,12 +948,14 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
             {
                 if (fieldSymbol.Name.Length > 0 && fieldSymbol.Name[0] == '<')
                     continue;
-                var fieldGenInfo   = GetGenerationInfo(fieldSymbol.GetAttributes());
+                var fieldGenInfo = GetGenerationInfo(fieldSymbol.GetAttributes());
                 var currentGenInfo = fieldGenInfo.WithDefaults(defaultGenInfo);
                 if (!currentGenInfo.GenerateProperty())
                     continue;
                 var propertyName = currentGenInfo.PropertyName ?? NormalizeFieldName(fieldSymbol.Name);
                 var propertyType = fieldSymbol.Type.ToDisplayString();
+                if (fieldSymbol.NullableAnnotation is NullableAnnotation.None && !fieldSymbol.Type.IsValueType)
+                    propertyType = string.Concat(propertyType, '?');
                 WriteOutInheritedAttributes(currentGenInfo, builder);
                 WriteOutAttributes(currentGenInfo, builder);
                 builder.Append("    "); // Indentation.
@@ -1047,10 +1050,10 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
     }
 
     private static void WriteOutGuards(
-        GenInfo       currentGenInfo,
+        GenInfo currentGenInfo,
         StringBuilder builder,
-        IFieldSymbol  fieldSymbol,
-        string        propertyName
+        IFieldSymbol fieldSymbol,
+        string propertyName
     )
     {
         foreach (var guardMethod in currentGenInfo.GuardMethods)
@@ -1143,10 +1146,10 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
     }
 
     private static void WriteOutValidationStrategyOutcome(
-        GenInfo       currentGenInfo,
+        GenInfo currentGenInfo,
         StringBuilder builder,
-        string        propertyName,
-        string        reason
+        string propertyName,
+        string reason
     )
     {
         switch (currentGenInfo.ValidationStrategy)
@@ -1186,9 +1189,9 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
     }
 
     private static void WriteOutNotifyPropertyChanging(
-        GenInfo       currentGenInfo,
+        GenInfo currentGenInfo,
         StringBuilder builder,
-        string        propertyName
+        string propertyName
     )
     {
         if (currentGenInfo.NotifyPropertyChanging is not null)
@@ -1200,10 +1203,10 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
     }
 
     private static void WriteOutEqualityCheck(
-        GenInfo       currentGenInfo,
-        string        propertyType,
+        GenInfo currentGenInfo,
+        string propertyType,
         StringBuilder builder,
-        IFieldSymbol  fieldSymbol
+        IFieldSymbol fieldSymbol
     )
     {
         switch (currentGenInfo.EqualityCheck)
@@ -1265,7 +1268,12 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                         builder.AppendLine($"            if (value == {fieldSymbol.Name}) return;");
                         break;
                     default:
-                        builder.AppendLine($"            if (value.Equals({fieldSymbol.Name})) return;");
+                        builder.AppendLine(
+                            fieldSymbol.NullableAnnotation is NullableAnnotation.NotAnnotated
+                            || fieldSymbol.Type.IsValueType
+                                ? $"            if (value.Equals({fieldSymbol.Name})) return;"
+                                : $"            if (value is null && {fieldSymbol.Name} is null || (value?.Equals({fieldSymbol.Name}) ?? false)) return;"
+                        );
                         break;
                 }
 
@@ -1273,7 +1281,8 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
             case ("1", _, _, { } customMethod):
                 builder.AppendLine($"            if ({customMethod}({fieldSymbol.Name}, value)) return;");
                 break;
-            case ("2", _, _, _): break;
+            case ("2", _, _, _):
+                break;
         }
     }
 }
