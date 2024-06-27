@@ -136,6 +136,12 @@ The properties are generated when one of the (Attributes)[#Attributes] is placed
 The source generator will then generate a partial class with the same name as the original class and add the properties
 to it.
 
+# What about documentation?
+
+Documenting the generated properties is as simple as documenting the field.
+Like, really, just document the field and the documentation will be copied
+over to the property. No need to break workflow in any way.
+
 ### Propety Name
 
 The property **name** will be the name of the field with the first letter capitalized and an optional underscore

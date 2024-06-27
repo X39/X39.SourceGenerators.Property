@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
@@ -894,7 +895,7 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
             var semanticModel = compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
 
             // Symbols allow us to get the compile-time information.
-            if (semanticModel.GetDeclaredSymbol(classDeclarationSyntax) is not INamedTypeSymbol classSymbol)
+            if (semanticModel.GetDeclaredSymbol(classDeclarationSyntax) is not { } classSymbol)
                 continue;
 
             var namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
@@ -958,6 +959,7 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                     propertyType = string.Concat(propertyType, '?');
                 WriteOutInheritedAttributes(currentGenInfo, builder);
                 WriteOutAttributes(currentGenInfo, builder);
+                WriteOutDocumentationTrivia(fieldSymbol, builder);
                 builder.Append("    "); // Indentation.
                 builder.Append(
                     currentGenInfo.PropertyEncapsulation switch
@@ -1031,6 +1033,39 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
             // Add the source code to the compilation.
             context.AddSource($"{className}.g.cs", SourceText.From(builder.ToString(), Encoding.UTF8));
         }
+    }
+
+    private static void WriteOutDocumentationTrivia(IFieldSymbol fieldSymbol, StringBuilder builder)
+    {
+        var declaringSyntax = fieldSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
+        if (declaringSyntax is null)
+            return;
+        if (declaringSyntax.Parent?.Parent is not FieldDeclarationSyntax fieldDeclarationSyntax)
+            return;
+        var trivia = Enumerable.Empty<SyntaxTrivia>()
+                .Concat(fieldDeclarationSyntax.AttributeLists.SelectMany((q)=>q.DescendantTrivia()))
+                .Concat(fieldDeclarationSyntax.Modifiers.SelectMany((q)=>q.GetAllTrivia()));
+        var doc = trivia.Where(
+                (q) =>
+                {
+                    if (q.IsKind(SyntaxKind.DocumentationCommentExteriorTrivia))
+                        return true;
+                    if (q.IsKind(SyntaxKind.EndOfDocumentationCommentToken))
+                        return true;
+                    if (q.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia))
+                        return true;
+                    if (q.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia))
+                        return true;
+                    return false;
+                })
+            .ToArray();
+        foreach (var syntaxTrivia in doc)
+        {
+            builder.Append("    "); // Indentation.
+            builder.Append(syntaxTrivia.ToFullString());
+        }
+        if (builder.Length > 2 && builder[builder.Length - 1] != '\n' && builder[builder.Length - 2] != '\n')
+            builder.AppendLine();
     }
 
     private static void WriteOutInheritedAttributes(GenInfo currentGenInfo, StringBuilder builder)
