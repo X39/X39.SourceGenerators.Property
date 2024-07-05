@@ -28,6 +28,7 @@
         <PackageTags>utility;property;source-generators</PackageTags>
         <AnalysisLevel>latest-recommended</AnalysisLevel>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <Deterministic>true</Deterministic>
     </PropertyGroup>
     <ItemGroup>
         <None Include="..\..\README.md">
