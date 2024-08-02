@@ -410,6 +410,46 @@ public partial class MyClass
 }
 ```
 
+## `NotifyOnAttribute` (property)
+
+This attribute will cause the source generator to generate additional change notifications for the property
+attached, if the named property is changing (and managed by the source generator).
+
+### On the property
+
+```csharp
+// User-Code
+[NotifyPropertyChanging(true)]
+[NotifyPropertyChanged(true)]
+public partial class MyClass
+{
+    private int _myProperty;
+    [NotifyOn(nameof(MyProperty))]
+    public int Indicection => _myProperty;
+}
+
+// Generated-Code
+public partial class MyClass
+    : System.ComponentModel.INotifyPropertyChanged
+{
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+    public int MyProperty
+    {
+        get => _myProperty;
+        set
+        {
+            if (_myProperty == value)
+                return;
+            this.PropertyChanging?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(MyProperty)));
+            this.PropertyChanging?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(Indirection)));
+            _myProperty = value;
+            this.PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(MyProperty)));
+            this.PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(Indirection)));
+        }
+    }
+}
+```
+
 ## `DisableAttributeTakeoverAttribute` (class | field)
 
 This attribute will make the source generator not take over any attributes from the field to the property.
