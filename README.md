@@ -79,7 +79,7 @@ eg.:
 ```csharp
 using X39.SourceGenerators.Property;
 
-[NotifyPropertyChanged(true)]
+[NotifyPropertyChanged]
 public partial class MyClass
 {
     private int _myProperty;
@@ -666,14 +666,14 @@ public partial class MyClass
 ## `NotifyPropertyChangedAttribute` (class | field)
 
 This attribute will make the source generator add a `PropertyChanged` event call to the setter of the property.
-If the attribute is placed on the class and the parameter is set to `true` (default: `false`),
+If the attribute is placed on the class and the parameter is set to `true` (default: `true`),
 the source generator will implement the `INotifyPropertyChanged` interface on the class.
 
 ### On the class with true
 
 ```csharp
 // User-Code
-[NotifyPropertyChanged(true)]
+[NotifyPropertyChanged] // or [NotifyPropertyChanged(true)]
 public partial class MyClass
 {
     private int _myProperty;
@@ -732,7 +732,7 @@ public partial class MyClass
 public partial class MyClass : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
-    [NotifyPropertyChanged(true)]
+    [NotifyPropertyChanged] // or [NotifyPropertyChanged(true)]
     private int _myProperty;
 }
 
@@ -783,14 +783,14 @@ public partial class MyClass
 ## `NotifyPropertyChangingAttribute` (class | field)
 
 This attribute will make the source generator add a `PropertyChanging` event call to the setter of the property.
-If the attribute is placed on the class and the parameter is set to `true` (default: `false`),
+If the attribute is placed on the class and the parameter is set to `true` (default: `true`),
 the source generator will implement the `INotifyPropertyChanging` interface on the class.
 
 ### On the class with true
 
 ```csharp
 // User-Code
-[NotifyPropertyChanging(true)]
+[NotifyPropertyChanging] // or [NotifyPropertyChanging(true)]
 public partial class MyClass
 {
     private int _myProperty;
@@ -849,7 +849,7 @@ public partial class MyClass
 public partial class MyClass : INotifyPropertyChanging
 {
     public event PropertyChangingEventHandler? PropertyChanging;
-    [NotifyPropertyChanging(true)]
+    [NotifyPropertyChanging] // or [NotifyPropertyChanging(true)]
     private int _myProperty;
 }
 
