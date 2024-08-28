@@ -941,7 +941,15 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
             var namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
 
             // 'Identifier' means the token of the node. Get class name from the syntax node.
-            var className = classDeclarationSyntax.Identifier.Text;
+            var fullClassName = string.Concat(
+                classDeclarationSyntax.Identifier,
+                classDeclarationSyntax.TypeParameterList
+            );
+            var fileClassName = fullClassName
+                .Replace('<', '_')
+                .Replace('>', '_')
+                .Replace(',', '_')
+                .Replace(" ", string.Empty);
 
             var usingStrings = new HashSet<string> { "using System;", "using System.Collections.Generic;" };
             if (classDeclarationSyntax.Parent is BaseNamespaceDeclarationSyntax namespaceDeclarationSyntax)
@@ -966,7 +974,7 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                 builder.AppendLine(usingDirectiveSyntax);
             builder.AppendLine();
             builder.AppendLine($"namespace {namespaceName};");
-            builder.AppendLine($"partial class {className}");
+            builder.AppendLine($"partial class {fullClassName}");
             if (defaultGenInfo is { NotifyPropertyChanging: true, NotifyPropertyChanged: true })
                 builder.AppendLine(
                     " : System.ComponentModel.INotifyPropertyChanged, System.ComponentModel.INotifyPropertyChanging"
@@ -986,7 +994,8 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                 );
 
             var notifyOnDictionary = CreateNotifyOnDictionary(classSymbol);
-            foreach (var fieldSymbol in classSymbol.GetMembers().OfType<IFieldSymbol>())
+            var fieldSymbols = classSymbol.GetMembers().OfType<IFieldSymbol>();
+            foreach (var fieldSymbol in fieldSymbols)
             {
                 if (fieldSymbol.Name.Length > 0 && fieldSymbol.Name[0] == '<')
                     continue;
@@ -996,7 +1005,8 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                     continue;
                 var propertyName = currentGenInfo.PropertyName ?? NormalizeFieldName(fieldSymbol.Name);
                 var propertyType = fieldSymbol.Type.ToDisplayString();
-                if (fieldSymbol.NullableAnnotation is NullableAnnotation.None && !fieldSymbol.Type.IsValueType)
+                if (IsNullableFieldSymbol(fieldSymbol)
+                    && !propertyType.EndsWith("?", StringComparison.InvariantCulture))
                     propertyType = string.Concat(propertyType, '?');
                 WriteOutInheritedAttributes(currentGenInfo, builder);
                 WriteOutAttributes(currentGenInfo, builder);
@@ -1093,7 +1103,7 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
             builder.AppendLine("}");
 
             // Add the source code to the compilation.
-            context.AddSource($"{className}.g.cs", SourceText.From(builder.ToString(), Encoding.UTF8));
+            context.AddSource($"{fileClassName}.g.cs", SourceText.From(builder.ToString(), Encoding.UTF8));
         }
     }
 
@@ -1408,10 +1418,9 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                         break;
                     default:
                         builder.AppendLine(
-                            fieldSymbol.NullableAnnotation is NullableAnnotation.NotAnnotated
-                            || fieldSymbol.Type.IsValueType
-                                ? $"            if (value.Equals({fieldSymbol.Name})) return;"
-                                : $"            if (value is null && {fieldSymbol.Name} is null || (value?.Equals({fieldSymbol.Name}) ?? false)) return;"
+                            IsNullableFieldSymbol(fieldSymbol)
+                                ? $"            if (value is null && {fieldSymbol.Name} is null || (value?.Equals({fieldSymbol.Name}) ?? false)) return;"
+                                : $"            if (value.Equals({fieldSymbol.Name})) return;"
                         );
                         break;
                 }
@@ -1422,6 +1431,21 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
                 break;
             case ("2", _, _, _):
                 break;
+        }
+    }
+
+    private static bool IsNullableFieldSymbol(IFieldSymbol fieldSymbol)
+    {
+        if (fieldSymbol.NullableAnnotation is NullableAnnotation.Annotated)
+            return true;
+
+        if (fieldSymbol.Type.TypeKind != TypeKind.TypeParameter)
+        {
+            return fieldSymbol.NullableAnnotation is NullableAnnotation.None && !fieldSymbol.Type.IsValueType;
+        }
+        else
+        {
+            return fieldSymbol.NullableAnnotation is NullableAnnotation.None && !fieldSymbol.Type.IsValueType;
         }
     }
 }
