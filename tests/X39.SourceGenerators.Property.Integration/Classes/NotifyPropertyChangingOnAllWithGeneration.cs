@@ -1,5 +1,4 @@
-﻿using X39.SourceGenerators.Property;
-// ReSharper disable CheckNamespace
+﻿// ReSharper disable CheckNamespace
 namespace TestNamespace;
 
 [NotifyPropertyChanging(true)]

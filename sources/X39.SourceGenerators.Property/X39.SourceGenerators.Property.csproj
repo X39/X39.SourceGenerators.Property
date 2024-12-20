@@ -1,5 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk">
-    <!-- See https://github.com/dotnet/roslyn/blob/main/docs/features/source-generators.cookbook.md#package-a-generator-as-a-nuget-package for nuget configuration details -->
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <IsPackable>true</IsPackable>
@@ -7,8 +7,6 @@
         <LangVersion>latest</LangVersion>
 
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-        <IsRoslynComponent>true</IsRoslynComponent>
-        <IncludeBuildOutput>false</IncludeBuildOutput>
 
         <PackageId>X39.SourceGenerators.Property</PackageId>
         <Authors>X39</Authors>
@@ -29,32 +27,24 @@
         <AnalysisLevel>latest-recommended</AnalysisLevel>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <Deterministic>true</Deterministic>
+
+        <NoWarn>CA1716</NoWarn>
     </PropertyGroup>
+    <Target Name="SourceGenerator" BeforeTargets="Build">
+        <MSBuild Projects="..\X39.SourceGenerators.Property.Generator\X39.SourceGenerators.Property.Generator.csproj"
+                 BuildInParallel="false"
+                 StopOnFirstFailure="true" />
+    </Target>
     <ItemGroup>
         <None Include="..\..\README.md">
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>
         </None>
         <None Remove="Properties\launchSettings.json"/>
+        <None Include="..\X39.SourceGenerators.Property.Generator\bin\$(Configuration)\netstandard2.0\X39.SourceGenerators.Property.Generator.dll"
+              PackagePath="analyzers\dotnet\roslyn4.0\cs"
+              Pack="true"
+              Visible="false" />
     </ItemGroup>
-    <ItemGroup>
-        <!-- !IMPORTANT! There should only be 3 references in this group: -->
-        <!-- * Microsoft.CodeAnalysis.Analyzers -->
-        <!-- * Microsoft.CodeAnalysis.CSharp -->
-        <!-- * Microsoft.CodeAnalysis.CSharp.Workspaces -->
-        <!-- Any other references will cause the generator to fault -->
-        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.5.0"/>
-    </ItemGroup>
-    <ItemGroup>
-        <Folder Include="Properties\"/>
-    </ItemGroup>
-    <ItemGroup>
-        <!-- Package the generator in the analyzer directory of the nuget package -->
-        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
-    </ItemGroup>
+
 </Project>

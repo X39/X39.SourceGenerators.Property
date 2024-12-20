@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 
-namespace X39.SourceGenerators.Property;
+namespace X39.SourceGenerators.Property.Generator;
 
 public static class TypedConstantExtensions
 {

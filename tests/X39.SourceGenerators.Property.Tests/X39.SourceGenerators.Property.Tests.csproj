@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\sources\X39.SourceGenerators.Property.Generator\X39.SourceGenerators.Property.Generator.csproj" />
         <ProjectReference Include="..\..\sources\X39.SourceGenerators.Property\X39.SourceGenerators.Property.csproj" />
     </ItemGroup>
 

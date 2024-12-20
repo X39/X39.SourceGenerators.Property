@@ -10,7 +10,8 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <ProjectReference Include="..\..\sources\X39.SourceGenerators.Property\X39.SourceGenerators.Property.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\..\sources\X39.SourceGenerators.Property.Generator\X39.SourceGenerators.Property.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\..\sources\X39.SourceGenerators.Property\X39.SourceGenerators.Property.csproj" />
     </ItemGroup>
 
     <ItemGroup>

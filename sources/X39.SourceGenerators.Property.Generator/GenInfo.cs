@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace X39.SourceGenerators.Property;
+namespace X39.SourceGenerators.Property.Generator;
 
 internal sealed class GenInfo
 {
