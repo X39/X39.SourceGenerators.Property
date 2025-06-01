@@ -584,7 +584,7 @@ public class PropertyIncrementalSourceGenerator : IIncrementalGenerator
             builder.AppendLine("}");
 
             // Add the source code to the compilation.
-            context.AddSource($"{fileClassName}.g.cs", SourceText.From(builder.ToString(), Encoding.UTF8));
+            context.AddSource($"{namespaceName}.{fileClassName}.g.cs", SourceText.From(builder.ToString(), Encoding.UTF8));
         }
     }
 
